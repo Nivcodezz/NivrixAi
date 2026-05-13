@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NivrixPlay AI - Designer & App Builder</title>
+    <script>
+        const originalWarn = console.warn;
+        console.warn = (...args) => {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+            originalWarn(...args);
+        };
+    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(217, 70, 239, 0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(217, 70, 239, 0.4); }
+        
+        /* Iframe scrollbar styling injects directly inside srcdoc later */
+
+        @keyframes bgPulse {
+            0% { background-color: rgba(0,0,0,0.6); }
+            50% { background-color: rgba(88,28,135,0.4); }
+            100% { background-color: rgba(0,0,0,0.6); }
+        }
+        .animate-bg-pulse {
+            animation: bgPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes textPulseScale {
+            0% { opacity: 0.5; transform: scale(0.95); text-shadow: 0px 0px 5px rgba(168,85,247,0.2); }
+            50% { opacity: 1; transform: scale(1.05); text-shadow: 0px 0px 15px rgba(168,85,247,0.8); }
+            100% { opacity: 0.5; transform: scale(0.95); text-shadow: 0px 0px 5px rgba(168,85,247,0.2); }
+        }
+        .animate-text-pulse-scale {
+            animation: textPulseScale 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0c] text-white transition-colors duration-500 overflow-hidden font-sans">
+    <div id="app" class="flex h-screen w-full">
+        
+        <!-- Sidebar Navigation -->
+        <aside id="sidebarNav" class="w-20 hidden lg:flex flex-col items-center py-8 border-r bg-[#111114] border-slate-800 transition-colors duration-500">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-600/40 mb-12 transform hover:scale-110 transition-transform duration-300">
+                <i data-lucide="sparkles" class="text-white w-6 h-6"></i>
+            </div>
+            <div class="flex-1 space-y-8 text-slate-400">
+                <i data-lucide="layout" class="w-5 h-5 hover:text-purple-500 cursor-pointer transition-colors"></i>
+                <i data-lucide="zap" class="w-5 h-5 hover:text-purple-500 cursor-pointer transition-colors"></i>
+                <i data-lucide="layers" class="w-5 h-5 hover:text-purple-500 cursor-pointer transition-colors"></i>
+                <i data-lucide="terminal" class="w-5 h-5 hover:text-purple-500 cursor-pointer transition-colors"></i>
+                <i data-lucide="crown" onclick="togglePricing(true)" class="w-5 h-5 hover:text-purple-500 cursor-pointer transition-colors"></i>
+            </div>
+            <button onclick="toggleTheme()" id="themeBtn" class="p-3 rounded-xl bg-slate-800 text-yellow-400 hover:bg-slate-700 transition-all">
+                <i data-lucide="sun" id="themeIcon" class="w-5 h-5"></i>
+            </button>
+        </aside>
+
+        <!-- Main Chat Panel -->
+        <section id="chatSection" class="w-full lg:w-[450px] flex flex-col border-r bg-[#121217] border-slate-800 transition-colors duration-500">
+            <header class="p-6 border-b border-inherit flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="lg:hidden w-10 h-10 bg-gradient-to-br from-purple-600 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="sparkles" class="text-white w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-fuchsia-500">NivrixPlay</h1>
+                        <p class="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">AI UI/UX Designer</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="togglePricing(true)" class="mr-2 text-xs font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-3 py-1 rounded-full shadow-lg hover:scale-105 transition-transform">
+                        Upgrade Pro
+                    </button>
+                    <span id="statusDot" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span id="statusText" class="text-xs text-slate-500 font-medium">Online</span>
+                </div>
+            </header>
+
+            <div id="chatHistory" class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <!-- Initial Message -->
+                <div class="flex flex-col items-start animate__animated animate__fadeInUp">
+                    <div class="max-w-[85%] p-4 rounded-2xl shadow-sm bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700" id="msg-bubble-init">
+                        <p class="text-sm leading-relaxed">Halo! Saya <b>NivrixPlay AI</b>. Siap mendesain UI/UX modern dan membangun aplikasi fungsional untuk Anda hari ini. Apa yang bisa saya bantu?</p>
+                    </div>
+                    <span class="text-[10px] text-slate-500 mt-2 px-1 uppercase tracking-tighter" id="init-time"></span>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div id="inputArea" class="p-6 border-t border-slate-800 transition-colors duration-500">
+                <div id="inputBox" class="relative group transition-all duration-300 rounded-2xl p-1 bg-slate-800/50 hover:bg-slate-800">
+                    <textarea id="promptInput" class="w-full bg-transparent border-none rounded-xl p-4 pr-14 text-sm text-white focus:ring-0 focus:outline-none resize-none min-h-[100px]" placeholder="Jelaskan desain UI/UX atau aplikasi yang ingin Anda buat..." onkeydown="handleEnter(event)"></textarea>
+                    <button id="sendBtn" onclick="generateCode()" class="absolute bottom-4 right-4 p-3 rounded-xl transition-all shadow-lg bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:scale-105 hover:shadow-purple-500/40 active:scale-95 text-white">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex flex-wrap gap-2" id="presetButtons">
+                        <!-- Buttons added via JS -->
+                    </div>
+                    <div class="flex gap-4 items-center pl-2">
+                        <a href="https://youtube.com/@mrnivrixx?si=hrh3wPXuT38iD2d7" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-red-500 transition-colors">
+                            <i data-lucide="youtube" class="w-4 h-4"></i>
+                        </a>
+                        <a href="https://t.me/MrNivriix" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-blue-500 transition-colors">
+                            <i data-lucide="send" class="w-4 h-4 transform -rotate-45"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Panel -->
+        <section id="previewSection" class="hidden md:flex flex-1 flex-col bg-[#0f0f12] transition-colors duration-500">
+            <header id="previewHeader" class="h-20 border-b flex items-center justify-between px-8 bg-[#121217] border-slate-800 transition-colors duration-500">
+                <div class="flex items-center gap-6">
+                    <button class="flex items-center gap-2 text-sm font-bold border-b-2 h-20 border-purple-500 text-purple-400 transition-all">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Liveset Pratinjau
+                    </button>
+                    <button class="flex items-center gap-2 text-sm font-medium text-slate-500 h-20 hover:text-purple-500 transition-all">
+                        <i data-lucide="code-2" class="w-4 h-4"></i> Kode Sumber
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="deviceToggle" class="flex p-1 rounded-xl items-center bg-slate-800 transition-colors">
+                        <button class="p-2 bg-slate-700 rounded-lg shadow-sm text-purple-600"><i data-lucide="monitor" class="w-4 h-4"></i></button>
+                        <button class="p-2 text-slate-400 hover:text-purple-500"><i data-lucide="smartphone" class="w-4 h-4"></i></button>
+                    </div>
+                    <button onclick="downloadCode()" class="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/30 hover:scale-105 transition-all active:scale-95">
+                        Download Kode
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex-1 p-10 overflow-hidden flex justify-center items-center">
+                <div id="iframeContainer" class="w-full h-full max-w-6xl rounded-2xl overflow-hidden shadow-2xl border border-slate-800 shadow-purple-900/10 transition-all duration-700 animate__animated animate__fadeIn">
+                    <iframe id="previewFrame" class="w-full h-full border-none bg-white"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Full Screen Loading Overlay (Mobile) -->
+        <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center backdrop-blur-md hidden animate__animated animate__fadeIn animate-bg-pulse">
+            <div class="w-20 h-20 relative">
+                <div class="absolute inset-0 border-4 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)] border-t-transparent rounded-full animate-spin"></div>
+                <div class="absolute inset-4 border-4 border-fuchsia-400/50 border-b-transparent rounded-full animate-spin" style="animation-direction:reverse"></div>
+            </div>
+            <p class="mt-8 text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 animate-text-pulse-scale">Nivrix sedang merancang kode...</p>
+        </div>
+
+        <!-- Pricing Modal -->
+        <div id="pricingModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 hidden animate__animated animate__fadeIn" onclick="togglePricing(false)">
+            <div id="pricingContent" class="w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl bg-[#121217] border border-slate-800 p-8 text-center relative transition-colors duration-500" onclick="event.stopPropagation()">
+                <button onclick="togglePricing(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-200">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <h2 class="text-3xl font-extrabold mb-2 text-white" id="pricingTitle">Upgrade ke <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-fuchsia-500">NivrixPlay Pro</span></h2>
+                <p class="text-slate-400 mb-8" id="pricingDesc">Dapatkan akses tak terbatas ke semua fitur AI desain super canggih.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 1 Hari -->
+                    <div id="card1" class="p-6 rounded-2xl border-2 bg-slate-800/50 border-slate-700 hover:border-purple-500 transition-all text-white">
+                        <h3 class="text-lg font-bold mb-2">Paket Harian</h3>
+                        <div class="text-4xl font-extrabold text-purple-500 mb-4">Rp 500<span class="text-sm text-slate-500 font-normal">/hari</span></div>
+                        <ul class="text-sm space-y-3 mb-6 text-left text-slate-300">
+                            <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Akses AI 24 Jam</li>
+                            <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Generate Kode Unlimited</li>
+                        </ul>
+                        <a href="mailto:chandrafmx5@gmail.com?subject=Pembelian%20Paket%20Harian%20NivrixPlay" class="block w-full py-3 rounded-xl bg-purple-600/10 text-purple-400 hover:bg-purple-600 hover:text-white transition-all font-bold">Beli Sekarang</a>
+                    </div>
+                    <!-- 1 Tahun -->
+                    <div id="card2" class="p-6 rounded-2xl border-2 border-purple-500 relative bg-slate-800/80 shadow-purple-900/20 shadow-2xl text-white">
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Paling Hemat</div>
+                        <h3 class="text-lg font-bold mb-2">Paket Tahunan</h3>
+                        <div class="text-4xl font-extrabold text-purple-500 mb-4">Rp 5.000<span class="text-sm text-slate-500 font-normal">/tahun</span></div>
+                        <ul class="text-sm space-y-3 mb-6 text-left text-slate-300">
+                            <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Akses AI 1 Tahun Penuh</li>
+                            <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Generate Kode Unlimited</li>
+                            <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Dukungan Prioritas</li>
+                        </ul>
+                        <a href="mailto:chandrafmx5@gmail.com?subject=Pembelian%20Paket%20Tahunan%20NivrixPlay" class="block w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white hover:scale-105 hover:shadow-purple-500/30 transition-all font-bold">Beli Sekarang</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // Constants
+        // PASTE YOUR CLOUD RUN APP URL HERE:
+        const BACKEND_API_URL = "https://ais-pre-dkewzqeg5wqclimsuotrqa-341481578566.asia-southeast1.run.app/api/generate";
+        
+        let theme = 'dark';
+        let isGenerating = false;
+        let currentCode = `
+            <div class="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-400 p-10 text-center font-sans">
+                <div class="w-20 h-20 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 animate-pulse">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="text-purple-600" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Menunggu Instruksi Desain</h2>
+                <p class="mt-2 max-w-md">Ketik perintah di panel kiri untuk mulai membuat desain UI, mockup landing page, atau aplikasi fungsional.</p>
+            </div>
+        `;
+
+        document.getElementById('init-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        updateIframe(currentCode);
+
+        // Render Presets
+        const presets = ['Landing Page Toko', 'Dashboard Admin', 'Form Login Kreatif'];
+        const presetContainer = document.getElementById('presetButtons');
+        presets.forEach(p => {
+            const btn = document.createElement('button');
+            btn.innerText = p;
+            btn.className = "text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all preset-btn border-slate-700 text-slate-500 hover:border-purple-500 hover:text-purple-400";
+            btn.onclick = () => {
+                document.getElementById('promptInput').value = \`Buatlah desain \${p} yang modern dan keren.\`;
+            };
+            presetContainer.appendChild(btn);
+        });
+
+        function toggleTheme() {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            
+            // Toggle HTML dark class (for Tailwind class strategy)
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            
+            // Toggle App background & text
+            const body = document.body;
+            body.className = theme === 'dark' 
+                ? 'bg-[#0a0a0c] text-white transition-colors duration-500 overflow-hidden font-sans'
+                : 'bg-slate-50 text-slate-900 transition-colors duration-500 overflow-hidden font-sans';
+            
+            // Sidebar
+            const sidebar = document.getElementById('sidebarNav');
+            sidebar.className = theme === 'dark'
+                ? 'w-20 hidden lg:flex flex-col items-center py-8 border-r bg-[#111114] border-slate-800 transition-colors duration-500'
+                : 'w-20 hidden lg:flex flex-col items-center py-8 border-r bg-white border-slate-200 transition-colors duration-500';
+                
+            // Theme Icon
+            const themeBtn = document.getElementById('themeBtn');
+            themeBtn.className = theme === 'dark'
+                ? 'p-3 rounded-xl bg-slate-800 text-yellow-400 hover:bg-slate-700 transition-all'
+                : 'p-3 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
+            document.getElementById('themeIcon').setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+            
+            // Chat Section
+            document.getElementById('chatSection').className = theme === 'dark'
+                ? 'w-full lg:w-[450px] flex flex-col border-r bg-[#121217] border-slate-800 transition-colors duration-500'
+                : 'w-full lg:w-[450px] flex flex-col border-r bg-white border-slate-200 transition-colors duration-500';
+            
+            document.getElementById('inputArea').className = theme === 'dark'
+                ? 'p-6 border-t transition-colors duration-500 border-slate-800'
+                : 'p-6 border-t transition-colors duration-500 border-slate-100';
+                
+            document.getElementById('inputBox').className = theme === 'dark'
+                ? 'relative group transition-all duration-300 rounded-2xl p-1 bg-slate-800/50 hover:bg-slate-800'
+                : 'relative group transition-all duration-300 rounded-2xl p-1 bg-slate-100 hover:bg-slate-200 shadow-inner';
+                
+            document.getElementById('promptInput').className = \`w-full bg-transparent border-none rounded-xl p-4 pr-14 text-sm focus:ring-0 focus:outline-none resize-none min-h-[100px] \${theme === 'dark' ? 'text-white' : 'text-slate-900'}\`;
+
+            // Preview Section
+            document.getElementById('previewSection').className = theme === 'dark'
+                ? 'hidden md:flex flex-1 flex-col bg-[#0f0f12] transition-colors duration-500'
+                : 'hidden md:flex flex-1 flex-col bg-slate-100/50 transition-colors duration-500';
+                
+            document.getElementById('previewHeader').className = theme === 'dark'
+                ? 'h-20 border-b flex items-center justify-between px-8 bg-[#121217] border-slate-800 transition-colors duration-500'
+                : 'h-20 border-b flex items-center justify-between px-8 bg-white border-slate-200 shadow-sm transition-colors duration-500';
+                
+            document.getElementById('iframeContainer').className = theme === 'dark'
+                ? 'w-full h-full max-w-6xl rounded-2xl overflow-hidden shadow-2xl border border-slate-800 shadow-purple-900/10 transition-colors duration-500'
+                : 'w-full h-full max-w-6xl rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-white transition-colors duration-500';
+
+            // Pricing Modal Theme
+            document.getElementById('pricingContent').className = theme === 'dark'
+                ? 'w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl bg-[#121217] border border-slate-800 p-8 text-center relative transition-colors duration-500'
+                : 'w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl bg-white border border-slate-200 p-8 text-center relative transition-colors duration-500 text-slate-800';
+            
+            document.getElementById('pricingTitle').className = \`text-3xl font-extrabold mb-2 \${theme === 'dark' ? 'text-white' : 'text-slate-900'}\`;
+            document.getElementById('card1').className = \`p-6 rounded-2xl border-2 transition-all \${theme === 'dark' ? 'bg-slate-800/50 border-slate-700 hover:border-purple-500 text-white' : 'bg-slate-50 border-slate-200 hover:border-purple-500 text-slate-800'}\`;
+            document.getElementById('card2').className = \`p-6 rounded-2xl border-2 border-purple-500 relative transition-all \${theme === 'dark' ? 'bg-slate-800/80 shadow-purple-900/20 shadow-2xl text-white' : 'bg-white shadow-purple-500/10 shadow-2xl text-slate-800'}\`;
+
+            // Existing Chat Bubbles
+            document.querySelectorAll('.ai-bubble').forEach(el => {
+                el.className = \`ai-bubble max-w-[85%] p-4 rounded-2xl shadow-sm rounded-tl-none border \${theme === 'dark' ? 'bg-slate-800 text-slate-200 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}\`;
+            });
+            const initBubble = document.getElementById('msg-bubble-init');
+            if(initBubble) {
+                 initBubble.className = \`max-w-[85%] p-4 rounded-2xl shadow-sm rounded-tl-none border \${theme === 'dark' ? 'bg-slate-800 text-slate-200 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}\`;
+            }
+
+            // Presets
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.className = \`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all preset-btn \${theme === 'dark' ? 'border-slate-700 text-slate-500 hover:border-purple-500 hover:text-purple-400' : 'border-slate-200 text-slate-400 hover:border-purple-500 hover:text-purple-600'}\`;
+            });
+
+            lucide.createIcons();
+        }
+
+        function togglePricing(show) {
+            const modal = document.getElementById('pricingModal');
+            if(show) {
+                modal.classList.remove('hidden');
+                modal.classList.remove('animate__fadeOut');
+                modal.classList.add('animate__fadeIn');
+            } else {
+                modal.classList.remove('animate__fadeIn');
+                modal.classList.add('animate__fadeOut');
+                setTimeout(() => modal.classList.add('hidden'), 500);
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateCode();
+            }
+        }
+
+        function updateIframe(htmlCode) {
+            const srcDoc = \`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <meta charset="UTF-8">
+                    <script>
+                      const originalWarn = console.warn;
+                      console.warn = (...args) => {
+                        if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+                        originalWarn(...args);
+                      };
+                    </script>
+                    <script src="https://cdn.tailwindcss.com"><\\/script>
+                    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+                    <style>
+                      ::-webkit-scrollbar { width: 8px; }
+                      ::-webkit-scrollbar-track { background: transparent; }
+                      ::-webkit-scrollbar-thumb { background: rgba(217, 70, 239, 0.25); border-radius: 10px; }
+                      ::-webkit-scrollbar-thumb:hover { background: rgba(217, 70, 239, 0.5); }
+                      body { font-family: 'Plus Jakarta Sans', sans-serif; }
+                    </style>
+                  </head>
+                  <body>\${htmlCode}</body>
+                </html>
+            \`;
+            
+            const container = document.getElementById('iframeContainer');
+            // Re-trigger animation
+            container.classList.remove('animate__fadeIn');
+            void container.offsetWidth; 
+            container.classList.add('animate__fadeIn');
+            
+            document.getElementById('previewFrame').srcdoc = srcDoc;
+        }
+
+        function appendUserMessage(text) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const chatHistory = document.getElementById('chatHistory');
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex flex-col items-end animate__animated animate__fadeInUp';
+            msgDiv.innerHTML = \`
+                <div class="max-w-[85%] p-4 rounded-2xl shadow-sm bg-gradient-to-br from-purple-600 to-fuchsia-500 text-white rounded-tr-none shadow-purple-500/20">
+                  <p class="text-sm leading-relaxed">\${text}</p>
+                </div>
+                <span class="text-[10px] text-slate-500 mt-2 px-1 uppercase tracking-tighter">\${time}</span>
+            \`;
+            
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function appendAIMessage(text) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const chatHistory = document.getElementById('chatHistory');
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex flex-col items-start animate__animated animate__fadeInUp';
+            msgDiv.innerHTML = \`
+                <div class="ai-bubble max-w-[85%] p-4 rounded-2xl shadow-sm rounded-tl-none border \${theme === 'dark' ? 'bg-slate-800 text-slate-200 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}">
+                  <p class="text-sm leading-relaxed">\${text}</p>
+                </div>
+                <span class="text-[10px] text-slate-500 mt-2 px-1 uppercase tracking-tighter">\${time}</span>
+            \`;
+            
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        async function generateCode() {
+            const inputEl = document.getElementById('promptInput');
+            const prompt = inputEl.value;
+            
+            if (!prompt.trim() || isGenerating) return;
+            
+            isGenerating = true;
+            appendUserMessage(prompt);
+            inputEl.value = '';
+
+            // Loading indicators
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-purple-500 animate-ping";
+            document.getElementById('statusText').innerText = "Merancang...";
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            try {
+                // Fetch from our active backend!
+                const response = await fetch(BACKEND_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, theme })
+                });
+
+                const data = await response.json();
+                
+                if (data.code) {
+                    currentCode = data.code;
+                    updateIframe(currentCode);
+                    appendAIMessage("Desain telah diperbarui secara instan. Silakan tinjau hasilnya di panel pratinjau.");
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat generate.');
+                }
+            } catch (error) {
+                appendAIMessage(\`Error: \${error.message}. Coba lagi nanti.\`);
+            } finally {
+                isGenerating = false;
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                document.getElementById('statusText').innerText = "Online";
+                sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function downloadCode() {
+            const fullHtml = \`
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="UTF-8">
+    <script>
+      const originalWarn = console.warn;
+      console.warn = (...args) => {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+        originalWarn(...args);
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"><\\/script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+    </head>
+    <body>
+\${currentCode}
+    </body>
+</html>\`;
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Nivrix_Design.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

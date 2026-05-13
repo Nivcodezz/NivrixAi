@@ -260,6 +260,13 @@ export default function App() {
                 <html>
                   <head>
                     <meta charset="UTF-8">
+                    <script>
+                      const originalWarn = console.warn;
+                      console.warn = (...args) => {
+                        if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+                        originalWarn(...args);
+                      };
+                    </script>
                     <script src="https://cdn.tailwindcss.com"></script>
                     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -284,15 +291,39 @@ export default function App() {
         {isGenerating && (
           <motion.div 
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ 
+              opacity: 1,
+              backgroundColor: ["rgba(0,0,0,0.6)", "rgba(88,28,135,0.4)", "rgba(0,0,0,0.6)"]
+            }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md"
+            transition={{
+              backgroundColor: {
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }
+            }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center backdrop-blur-md"
           >
             <div className="w-20 h-20 relative">
-              <div className="absolute inset-0 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
-              <div className="absolute inset-4 border-4 border-white/20 border-b-transparent rounded-full animate-spin [animation-direction:reverse]" />
+              <div className="absolute inset-0 border-4 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)] border-t-transparent rounded-full animate-spin" />
+              <div className="absolute inset-4 border-4 border-fuchsia-400/50 border-b-transparent rounded-full animate-spin [animation-direction:reverse]" />
             </div>
-            <p className="mt-8 text-xl font-bold text-white animate-pulse">Nivrix sedang merancang kode...</p>
+            <motion.p 
+              animate={{
+                opacity: [0.5, 1, 0.5],
+                scale: [0.95, 1.05, 0.95],
+                textShadow: ["0px 0px 5px rgba(168,85,247,0.2)", "0px 0px 15px rgba(168,85,247,0.8)", "0px 0px 5px rgba(168,85,247,0.2)"]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="mt-8 text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400"
+            >
+              Nivrix sedang merancang kode...
+            </motion.p>
           </motion.div>
         )}
       </AnimatePresence>
