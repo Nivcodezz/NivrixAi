@@ -19,11 +19,16 @@ import {
   ChevronRight,
   Terminal,
   Zap,
-  Layers
+  Layers,
+  Crown,
+  X,
+  Check,
+  Youtube
 } from 'lucide-react';
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [showPricing, setShowPricing] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<any[]>([
@@ -107,6 +112,7 @@ export default function App() {
           <Zap className="hover:text-purple-500 cursor-pointer transition-colors" size={22} />
           <Layers className="hover:text-purple-500 cursor-pointer transition-colors" size={22} />
           <Terminal className="hover:text-purple-500 cursor-pointer transition-colors" size={22} />
+          <Crown className="hover:text-purple-500 cursor-pointer transition-colors" size={22} onClick={() => setShowPricing(true)} />
         </div>
         <button onClick={toggleTheme} className={`p-3 rounded-xl transition-all ${theme === 'dark' ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -126,8 +132,14 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-xs text-slate-500 font-medium">Online</span>
+            <button 
+              onClick={() => setShowPricing(true)}
+              className="mr-2 text-xs font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-3 py-1 rounded-full shadow-lg hover:scale-105 transition-transform"
+            >
+              Upgrade Pro
+            </button>
+            <span className={`w-2 h-2 rounded-full ${isGenerating ? 'bg-purple-500 animate-ping' : 'bg-green-500 animate-pulse'}`} />
+            <span className="text-xs text-slate-500 font-medium">{isGenerating ? 'Merancang...' : 'Online'}</span>
           </div>
         </header>
 
@@ -158,7 +170,7 @@ export default function App() {
                 <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]" />
                 <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" />
               </div>
-              <span className="text-xs font-semibold animate-pulse">Nivrix sedang merancang...</span>
+              <span className="text-xs font-semibold animate-pulse">Nivrix sedang merancang kode...</span>
             </motion.div>
           )}
           <div ref={chatEndRef} />
@@ -186,16 +198,26 @@ export default function App() {
               <Send size={18} className="text-white" />
             </button>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {['Landing Page Toko', 'Dashboard Admin', 'Form Login Kreatif'].map((preset) => (
-              <button 
-                key={preset}
-                onClick={() => setPrompt(`Buatlah desain ${preset} yang modern dan keren.`)}
-                className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all ${theme === 'dark' ? 'border-slate-700 text-slate-500 hover:border-purple-500 hover:text-purple-400' : 'border-slate-200 text-slate-400 hover:border-purple-500 hover:text-purple-600'}`}
-              >
-                {preset}
-              </button>
-            ))}
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              {['Landing Page Toko', 'Dashboard Admin', 'Form Login Kreatif'].map((preset) => (
+                <button 
+                  key={preset}
+                  onClick={() => setPrompt(`Buatlah desain ${preset} yang modern dan keren.`)}
+                  className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border transition-all ${theme === 'dark' ? 'border-slate-700 text-slate-500 hover:border-purple-500 hover:text-purple-400' : 'border-slate-200 text-slate-400 hover:border-purple-500 hover:text-purple-600'}`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-4 items-center pl-2">
+              <a href="https://youtube.com/@mrnivrixx?si=hrh3wPXuT38iD2d7" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-red-500 transition-colors" title="YouTube Channel">
+                <Youtube size={18} />
+              </a>
+              <a href="https://t.me/MrNivriix" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-blue-500 transition-colors" title="Telegram">
+                <Send size={18} className="transform -rotate-45" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -225,9 +247,9 @@ export default function App() {
         <div className="flex-1 p-10 overflow-hidden flex justify-center items-center">
           <motion.div 
             key={generatedCode}
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             className={`w-full h-full max-w-6xl rounded-2xl overflow-hidden shadow-2xl border transition-colors duration-500 ${theme === 'dark' ? 'border-slate-800 shadow-purple-900/10' : 'border-slate-200 bg-white'}`}
           >
             <iframe
@@ -257,20 +279,79 @@ export default function App() {
         </div>
       </section>
 
-      {/* Mobile Overlay */}
+      {/* Full Screen Loading Overlay */}
       <AnimatePresence>
         {isGenerating && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md lg:hidden"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md"
           >
             <div className="w-20 h-20 relative">
               <div className="absolute inset-0 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
               <div className="absolute inset-4 border-4 border-white/20 border-b-transparent rounded-full animate-spin [animation-direction:reverse]" />
             </div>
-            <p className="mt-8 text-xl font-bold text-white animate-pulse">Nivrix sedang meramu kode...</p>
+            <p className="mt-8 text-xl font-bold text-white animate-pulse">Nivrix sedang merancang kode...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pricing Modal */}
+      <AnimatePresence>
+        {showPricing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowPricing(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className={`w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl ${theme === 'dark' ? 'bg-[#121217] border border-slate-800' : 'bg-white border border-slate-200'}`}
+              onClick={e => e.stopPropagation()}
+            >
+               <div className="p-8 text-center relative">
+                  <button onClick={() => setShowPricing(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <X size={24} />
+                  </button>
+                  <h2 className="text-3xl font-extrabold mb-2">Upgrade ke <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-fuchsia-500">NivrixPlay Pro</span></h2>
+                  <p className="text-slate-500 dark:text-slate-400 mb-8">Dapatkan akses tak terbatas ke semua fitur AI desain super canggih.</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* 1 Hari */}
+                    <div className={`p-6 rounded-2xl border-2 transition-all ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700 hover:border-purple-500' : 'bg-slate-50 border-slate-200 hover:border-purple-500'}`}>
+                      <h3 className="text-lg font-bold mb-2">Paket Harian</h3>
+                      <div className="text-4xl font-extrabold text-purple-500 mb-4">Rp 500<span className="text-sm text-slate-500 font-normal">/hari</span></div>
+                      <ul className="text-sm space-y-3 mb-6 text-left text-slate-600 dark:text-slate-300">
+                        <li className="flex gap-2"><Check size={16} className="text-green-500" /> Akses AI 24 Jam</li>
+                        <li className="flex gap-2"><Check size={16} className="text-green-500" /> Generate Kode Unlimited</li>
+                      </ul>
+                      <a href="mailto:chandrafmx5@gmail.com?subject=Pembelian%20Paket%20Harian%20NivrixPlay" className="block w-full py-3 rounded-xl bg-purple-600/10 text-purple-600 hover:bg-purple-600 hover:text-white transition-all font-bold">
+                        Beli Sekarang
+                      </a>
+                    </div>
+
+                    {/* 1 Tahun */}
+                    <div className={`p-6 rounded-2xl border-2 border-purple-500 relative ${theme === 'dark' ? 'bg-slate-800/80 shadow-purple-900/20 shadow-2xl' : 'bg-white shadow-purple-500/10 shadow-2xl'}`}>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Paling Hemat</div>
+                      <h3 className="text-lg font-bold mb-2">Paket Tahunan</h3>
+                      <div className="text-4xl font-extrabold text-purple-500 mb-4">Rp 5.000<span className="text-sm text-slate-500 font-normal">/tahun</span></div>
+                      <ul className="text-sm space-y-3 mb-6 text-left text-slate-600 dark:text-slate-300">
+                        <li className="flex gap-2"><Check size={16} className="text-green-500" /> Akses AI 1 Tahun Penuh</li>
+                        <li className="flex gap-2"><Check size={16} className="text-green-500" /> Generate Kode Unlimited</li>
+                        <li className="flex gap-2"><Check size={16} className="text-green-500" /> Dukungan Prioritas</li>
+                      </ul>
+                      <a href="mailto:chandrafmx5@gmail.com?subject=Pembelian%20Paket%20Tahunan%20NivrixPlay" className="block w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white hover:scale-105 hover:shadow-purple-500/30 transition-all font-bold">
+                        Beli Sekarang
+                      </a>
+                    </div>
+                  </div>
+               </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
