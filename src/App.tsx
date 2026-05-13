@@ -99,7 +99,7 @@ export default function App() {
       
       {/* Sidebar Navigation */}
       <aside className={`w-20 hidden lg:flex flex-col items-center py-8 border-r transition-colors duration-500 ${theme === 'dark' ? 'bg-[#111114] border-slate-800' : 'bg-white border-slate-200'}`}>
-        <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-600/30 mb-12">
+        <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-600/40 mb-12 transform hover:scale-110 transition-transform duration-300">
           <Sparkles className="text-white" size={24} />
         </div>
         <div className="flex-1 space-y-8 text-slate-400">
@@ -117,11 +117,11 @@ export default function App() {
       <section className={`w-full lg:w-[450px] flex flex-col border-r transition-colors duration-500 ${theme === 'dark' ? 'bg-[#121217] border-slate-800' : 'bg-white border-slate-200'}`}>
         <header className="p-6 border-b border-inherit flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="lg:hidden w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="lg:hidden w-10 h-10 bg-gradient-to-br from-purple-600 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg">
               <Sparkles className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Nivrix<span className="text-purple-500">Play</span></h1>
+              <h1 className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-fuchsia-500">NivrixPlay</h1>
               <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">AI UI/UX Designer</p>
             </div>
           </div>
@@ -141,9 +141,9 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
               >
-                <div className={`max-w-[85%] p-4 rounded-2xl ${msg.role === 'user' 
-                  ? 'bg-purple-600 text-white rounded-tr-none shadow-lg' 
-                  : theme === 'dark' ? 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700' : 'bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200 shadow-sm'
+                <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm ${msg.role === 'user' 
+                  ? 'bg-gradient-to-br from-purple-600 to-fuchsia-500 text-white rounded-tr-none shadow-purple-500/20' 
+                  : theme === 'dark' ? 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700' : 'bg-white text-slate-800 rounded-tl-none border border-slate-200'
                 }`}>
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                 </div>
@@ -181,7 +181,7 @@ export default function App() {
             />
             <button 
               onClick={handleGenerate}
-              className={`absolute bottom-4 right-4 p-3 rounded-xl transition-all shadow-lg ${isGenerating ? 'opacity-50 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 hover:scale-105 active:scale-95'}`}
+              className={`absolute bottom-4 right-4 p-3 rounded-xl transition-all shadow-lg ${isGenerating ? 'opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:scale-105 hover:shadow-purple-500/40 active:scale-95'}`}
             >
               <Send size={18} className="text-white" />
             </button>
@@ -216,16 +216,18 @@ export default function App() {
               <button className="p-2 bg-white dark:bg-slate-700 rounded-lg shadow-sm text-purple-600"><Monitor size={18} /></button>
               <button className="p-2 text-slate-400 hover:text-purple-500"><Smartphone size={18} /></button>
             </div>
-            <button className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/20 hover:bg-purple-500 hover:-translate-y-0.5 transition-all active:translate-y-0">
-              Download App
+            <button className="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/30 hover:scale-105 transition-all active:scale-95">
+              Download Kode
             </button>
           </div>
         </header>
 
         <div className="flex-1 p-10 overflow-hidden flex justify-center items-center">
           <motion.div 
+            key={generatedCode}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className={`w-full h-full max-w-6xl rounded-2xl overflow-hidden shadow-2xl border transition-colors duration-500 ${theme === 'dark' ? 'border-slate-800 shadow-purple-900/10' : 'border-slate-200 bg-white'}`}
           >
             <iframe
@@ -237,12 +239,13 @@ export default function App() {
                   <head>
                     <meta charset="UTF-8">
                     <script src="https://cdn.tailwindcss.com"></script>
-                    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+                    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
                     <style>
                       ::-webkit-scrollbar { width: 8px; }
                       ::-webkit-scrollbar-track { background: transparent; }
-                      ::-webkit-scrollbar-thumb { background: #6366f120; border-radius: 10px; }
-                      ::-webkit-scrollbar-thumb:hover { background: #6366f140; }
+                      ::-webkit-scrollbar-thumb { background: #d946ef40; border-radius: 10px; }
+                      ::-webkit-scrollbar-thumb:hover { background: #d946ef80; }
                       body { font-family: 'Plus Jakarta Sans', sans-serif; }
                     </style>
                   </head>

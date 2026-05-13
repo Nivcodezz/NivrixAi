@@ -22,25 +22,28 @@ async function startServer() {
         return res.status(500).json({ error: "Gemini API Key is missing" });
       }
 
-      const genAI = new GoogleGenAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const ai = new GoogleGenAI({ apiKey });
 
       const systemPrompt = `
         Anda adalah NivrixPlay AI, pakar UI/UX Designer dan Frontend Developer.
-        Tugas Anda adalah membuat kode HTML lengkap dengan Tailwind CSS berdasarkan permintaan user dalam Bahasa Indonesia.
+        Tugas Anda adalah membuat kode HTML tunggal dan lengkap dengan Tailwind CSS berdasarkan permintaan user dalam Bahasa Indonesia.
         
         ATURAN KETAT:
-        1. Kembalikan HANYA kode HTML di dalam blok kode.
+        1. Kembalikan HANYA kode HTML di dalam blok kode \`\`\`html ... \`\`\`. Jangan tambahkan penjelasan.
         2. Gunakan CDN Tailwind CSS: <script src="https://cdn.tailwindcss.com"></script>.
-        3. Pastikan desain modern, keren, penuh animasi (gunakan library seperti Animate.css atau transisi Tailwind), dan responsif.
-        4. Gunakan palet warna ${theme === 'dark' ? 'gelap dengan aksen ungu cerah' : 'terang dengan aksen ungu cerah'}.
-        5. Kode harus fungsional dan 100% tanpa kesalahan sintaks.
-        6. Sertakan font Google 'Plus Jakarta Sans'.
+        3. WAJIB menggunakan warna UNGU CERAH (seperti purple-500, fuchsia-500, atau violet-600) untuk elemen kunci, aksen, tombol, dan dekorasi.
+        4. Desain HARUS FULL ANIMASI yang terlihat keren dan modern! Gunakan transisi hover Tailwind (hover:-translate-y-1, hover:scale-105, duration-300) dan animasi masuk (fade-in, slide-up). Anda dapat menggunakan class dari Animate.css (seperti animate__animated animate__fadeInUp) karena library ini sudah dimuat.
+        5. Terapkan palet warna ${theme === 'dark' ? 'GELAP (latar slate-900/black)' : 'TERANG (latar putih/slate-50)'} sesuai permintaan UI/UX.
+        6. Kode harus 100% tanpa kesalahan (error-free) dan sangat responsif di semua perangkat (mobile & desktop).
+        7. Sertakan font Google 'Plus Jakarta Sans' sebagai font utama halaman.
       `;
 
-      const result = await model.generateContent([systemPrompt, prompt]);
-      const response = await result.response;
-      const text = response.text();
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: [systemPrompt, prompt],
+      });
+
+      const text = response.text || "";
 
       // Extract code from markdown blocks if present
       const codeMatch = text.match(/```html?([\s\S]*?)```/) || [null, text];
